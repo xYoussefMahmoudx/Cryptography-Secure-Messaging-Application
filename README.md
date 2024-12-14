@@ -1,1 +1,1 @@
-# -Cryptography-Secure-Messaging-Application
+# Cryptography-Secure-Messaging-Application
