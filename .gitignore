@@ -1,0 +1,3 @@
+# Ignore user-specific keys and public keys
+/user_keys/
+/public_keys/
