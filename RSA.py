@@ -13,7 +13,7 @@ def generate_keypair():
 def encrypt(public_key, plaintext):
     rsa_key = RSA.import_key(public_key)
     cipher = PKCS1_OAEP.new(rsa_key)
-    ciphertext = cipher.encrypt(plaintext.encode('utf-8'))
+    ciphertext = cipher.encrypt(plaintext)
     return ciphertext
 
 
@@ -21,7 +21,7 @@ def encrypt(public_key, plaintext):
 def decrypt(private_key, ciphertext):
     rsa_key = RSA.import_key(private_key)
     cipher = PKCS1_OAEP.new(rsa_key)
-    plaintext = cipher.decrypt(ciphertext).decode('utf-8')
+    plaintext = cipher.decrypt(ciphertext)
     return plaintext
 
 
