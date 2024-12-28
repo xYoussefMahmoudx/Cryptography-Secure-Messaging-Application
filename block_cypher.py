@@ -37,19 +37,4 @@ class AESEncryption:
         plaintext = cipher.decrypt_and_verify(ciphertext, tag)
         return plaintext.decode()
 
-# Example Usage
-if __name__ == "__main__":
-    aes = AESEncryption()
 
-    # Encrypt a message
-    message = "This is a secure message."
-    encrypted_data = aes.encrypt(message)
-    print("Encrypted Data:", encrypted_data)
-
-    # Decrypt the message
-    decrypted_message = aes.decrypt(
-        encrypted_data["ciphertext"],
-        encrypted_data["tag"],
-        encrypted_data["nonce"]
-    )
-    print("Decrypted Message:", decrypted_message)
