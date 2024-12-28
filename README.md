@@ -17,7 +17,7 @@ This system allows users to exchange secure messages by verifying user credentia
 
 ## Report
 
-For detailed information, including the technical documentation and implementation specifics, please refer to the [Full Project Report](#) (Link to be added).
+For detailed information, including the technical documentation and implementation specifics, please refer to the [Full Project Report](https://drive.google.com/file/d/1b2xBOU0MaO8WOyNxk2CYTH0mzyOogxmi/view?usp=sharing) .
 
 ## Run the Application:
 
