@@ -18,16 +18,18 @@ current_username=""
 current_password=""
 
 
-def handle_incoming_messages(connection, connection_list, username):
+def handle_incoming_messages(connection, connection_list):
     global current_username
     global current_password
 
     """Listen for incoming messages."""
     global current_peer_username
     try:
-        peer_username = connection.recv(1024).decode('utf-8')
-        current_peer_username = peer_username
-       
+        if current_peer_username is None:
+            peer_username = connection.recv(1024).decode('utf-8')
+            current_peer_username = peer_username
+        
+    
 
         while True:
             message = connection.recv(1024).decode('utf-8')
@@ -50,11 +52,13 @@ def handle_incoming_messages(connection, connection_list, username):
                     hashed_message = message_data.get("hashed_message", "")
                     km=KMM.KeyManagement()
                     private_key=km.load_private_key(user_id=current_username,password=current_password)
-
+                
                     decrypted_sym_key=RS.decrypt(private_key=private_key,ciphertext=encrypted_sym_key)
+                
                     bc=BC.AESEncryption(decrypted_sym_key)
                     plain_message=bc.decrypt(ciphertext=cipher_text,nonce=nonce,tag=tag)
                     hashing_validate=HS.HashingModule.verify_hash(data=plain_message,provided_hash=hashed_message)
+                
                     if(hashing_validate):
 
                         print(f"\n{current_peer_username}: {plain_message} ")
@@ -90,12 +94,11 @@ def start_server(server_port, connection_list):
         connection_list.append(connection)
         connection.send(username.encode('utf-8'))
         threading.Thread(
-            target=handle_incoming_messages, args=(connection, connection_list, None), daemon=True
+            target=handle_incoming_messages, args=(connection, connection_list), daemon=True
         ).start()
 
 
 def connect_to_peer(peer_host, peer_port, connection_list):
-    """Connect to a peer."""
     global current_peer_username
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
@@ -103,13 +106,14 @@ def connect_to_peer(peer_host, peer_port, connection_list):
         print(f"Connected to peer on port {peer_port}!")
         connection_list.append(client_socket)
 
+        # Send the username only once when the connection is established
         client_socket.send(username.encode('utf-8'))
         peer_username = client_socket.recv(1024).decode('utf-8')
         current_peer_username = peer_username
-        print(f"\nConnected with peer username: {peer_username}")
+        print(f"\nConnected with peer username: {current_peer_username}")
 
         threading.Thread(
-            target=handle_incoming_messages, args=(client_socket, connection_list, None), daemon=True
+            target=handle_incoming_messages, args=(client_socket, connection_list), daemon=True
         ).start()
     except Exception as e:
         print(f"Failed to connect to peer on port {peer_port}: {e}")
@@ -215,7 +219,9 @@ def start_peer(server_port, username):
                             
                 bc=BC.AESEncryption(sym_key)
                 cp=bc.encrypt(message)
+                
                 public_key=km.load_public_key(current_peer_username)
+                
 
                 encrypted_sym_key=RS.encrypt(public_key=public_key,plaintext=sym_key)
                 hashed_message=HS.HashingModule.generate_hash(message)
@@ -231,8 +237,9 @@ def start_peer(server_port, username):
                     'encrypted_sym_key':base64.b64encode(encrypted_sym_key).decode('utf-8'),
                     'hashed_message':hashed_message
 
+
                 }
-                
+
                 message_json = json.dumps(structured_message)  # Serialize to JSON
                 for conn in connection_list:
                     conn.send(message_json.encode('utf-8'))
