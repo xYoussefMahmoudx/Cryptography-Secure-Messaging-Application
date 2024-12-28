@@ -14,15 +14,3 @@ class HashingModule:
     
         computed_hash = HashingModule.generate_hash(data)
         return computed_hash == provided_hash
-
-    @staticmethod
-    def generate_hmac(key: str, data: str) -> str:
-        
-        hmac_result = hmac.new(key.encode('utf-8'), data.encode('utf-8'), hashlib.sha256).hexdigest()
-        return hmac_result
-
-    @staticmethod
-    def verify_hmac(key: str, data: str, provided_hmac: str) -> bool:
-        
-        computed_hmac = HashingModule.generate_hmac(key, data)
-        return computed_hmac == provided_hmac
