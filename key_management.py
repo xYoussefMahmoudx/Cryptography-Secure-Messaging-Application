@@ -177,33 +177,3 @@ class KeyManagement:
             os.remove(file_path)
         else:
             raise FileNotFoundError(f"Public key file {file_path} not found.")
-
-# Example Usage
-if __name__ == "__main__":
-    km = KeyManagement()
-
-    user_id = "user123"  # Unique user identifier
-    password = "userpassword"  # Password to protect private and symmetric keys
-
-    # Generate and save symmetric key
-    aes_key = km.generate_symmetric_key()
-    km.save_symmetric_key(aes_key, user_id, password)
-    loaded_aes_key = km.load_symmetric_key(user_id, password)
-    print("Symmetric Key:", loaded_aes_key)
-
-    # Generate and save private/public key pair
-    private_key,public_key = km.generate_rsa_key_pair()
-    km.save_private_key(private_key, user_id, password)
-    km.save_public_key(public_key, user_id)
-
-    # Load public key
-    loaded_public_key = km.load_public_key(user_id)
-    print("Public Key:", loaded_public_key.decode())
-
-    # Load and decrypt private key
-    loaded_private_key = km.load_private_key(user_id, password)
-    print("Decrypted Private Key:", loaded_private_key.decode())
-
-    # Deleting Keys (Just for Example)
-    #km.delete_private_key(user_id)
-    #km.delete_public_key(user_id)

@@ -4,6 +4,7 @@ import sys
 import hashlib
 from db import DB
 import json
+import base64
 import key_management as KMM
 import block_cypher as BC
 import RSA as RS
@@ -26,7 +27,7 @@ def handle_incoming_messages(connection, connection_list, username):
     try:
         peer_username = connection.recv(1024).decode('utf-8')
         current_peer_username = peer_username
-        print(f"\nConnected with peer username: {peer_username}")
+       
 
         while True:
             message = connection.recv(1024).decode('utf-8')
@@ -45,24 +46,25 @@ def handle_incoming_messages(connection, connection_list, username):
                     cipher_text = message_data.get("cipher_text", "Unknown")
                     nonce = message_data.get("nonce", "")
                     tag = message_data.get("tag", "")
-                    encrypted_sym_key = message_data.get("encrypted_sym_key", "")
-                    hashed_message = message_data.get("hashed_message", "").decode('utf-8')
-
+                    encrypted_sym_key = base64.b64decode(message_data.get("encrypted_sym_key", ""))
+                    hashed_message = message_data.get("hashed_message", "")
                     km=KMM.KeyManagement()
                     private_key=km.load_private_key(user_id=current_username,password=current_password)
+
                     decrypted_sym_key=RS.decrypt(private_key=private_key,ciphertext=encrypted_sym_key)
                     bc=BC.AESEncryption(decrypted_sym_key)
-                    message=bc.decrypt(ciphertext=cipher_text,nonce=nonce,tag=tag)
-                    hashing_validate=HS.HashingModule.verify_hash(data=message,provided_hash=hashed_message)
+                    plain_message=bc.decrypt(ciphertext=cipher_text,nonce=nonce,tag=tag)
+                    hashing_validate=HS.HashingModule.verify_hash(data=plain_message,provided_hash=hashed_message)
                     if(hashing_validate):
 
-                        print(f"\n{current_peer_username}: {message} ")
+                        print(f"\n{current_peer_username}: {plain_message} ")
                     else:
                         print(f"Communication between you and {current_peer_username} is insecure ")
                         connection_list.remove(connection)
                         connection.close()
                         current_peer_username = None
                         print("\n connection closed forcebly to maintain security")
+                    
 
                 except json.JSONDecodeError:
                     print(f"\nInvalid message format received: {message}")
@@ -153,7 +155,7 @@ def login():
         print("Invalid password.")
         return None, None
     current_username=username
-    current_password=current_password
+    current_password=password
 
     
 
@@ -213,7 +215,6 @@ def start_peer(server_port, username):
                             
                 bc=BC.AESEncryption(sym_key)
                 cp=bc.encrypt(message)
-
                 public_key=km.load_public_key(current_peer_username)
 
                 encrypted_sym_key=RS.encrypt(public_key=public_key,plaintext=sym_key)
@@ -227,8 +228,8 @@ def start_peer(server_port, username):
                     "cipher_text":cp['ciphertext'],
                     'nonce':cp['nonce'],
                     'tag':cp['tag'],
-                    'encrypted_sym_key':encrypted_sym_key,
-                    'hashed_message':hashed_message.encode('utf-8')
+                    'encrypted_sym_key':base64.b64encode(encrypted_sym_key).decode('utf-8'),
+                    'hashed_message':hashed_message
 
                 }
                 

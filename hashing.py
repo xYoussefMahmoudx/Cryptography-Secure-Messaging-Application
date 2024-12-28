@@ -26,25 +26,3 @@ class HashingModule:
         
         computed_hmac = HashingModule.generate_hmac(key, data)
         return computed_hmac == provided_hmac
-
-# Example Usage
-if __name__ == "__main__":
-    # Example data
-    data = "This is a secure message."
-    secret_key = "supersecretkey"
-
-    # Generate SHA-256 hash
-    hash_result = HashingModule.generate_hash(data)
-    print(f"SHA-256 Hash: {hash_result}")
-
-    # Verify hash
-    is_hash_valid = HashingModule.verify_hash(data, hash_result)
-    print(f"Is hash valid? {is_hash_valid}")
-
-    # Generate HMAC
-    hmac_result = HashingModule.generate_hmac(secret_key, data)
-    print(f"HMAC: {hmac_result}")
-
-    # Verify HMAC
-    is_hmac_valid = HashingModule.verify_hmac(secret_key, data, hmac_result)
-    print(f"Is HMAC valid? {is_hmac_valid}")
