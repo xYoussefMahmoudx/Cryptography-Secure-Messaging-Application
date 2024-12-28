@@ -12,6 +12,7 @@ if __name__ == "__main__":
     km.save_private_key(private_key=privatekey,user_id=userid1,password=userpassword1)
     km.save_public_key(public_key=publickey,user_id=userid1)
     sym_key=km.generate_symmetric_key()
+    
     print(f'symetric key :{sym_key}')
     
     bc=BC.AESEncryption(sym_key)
